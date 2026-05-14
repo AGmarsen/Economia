@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
+// Handles all the economic math
 @Injectable({
   providedIn: 'root',
 })
