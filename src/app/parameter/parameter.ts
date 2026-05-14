@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'parameter',
@@ -6,11 +6,16 @@ import { Component, input } from '@angular/core';
   template: `
     <div class="">
       <p>{{label()}}</p>
-      <input class="manual-input" type="number" placeholder="Enter {{ label() }}">
+      <input class="manual-input" [value]="internalValue" type="number" placeholder="Enter {{ label() }}" (input)="parameterSet()">
     </div>
   `,
 })
 export class Parameter {
   label = input<string>('Label');
-  value: number = 0;
+  internalValue: number = 0;
+  valueChangedEvent = output<number>();
+
+  parameterSet() {
+    this.valueChangedEvent.emit(+this.internalValue);
+  }
 }

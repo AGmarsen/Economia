@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Parameter } from './parameter/parameter';
+import { Accountant } from './accountant';
 
 @Component({
   selector: 'app-root',
@@ -10,4 +11,5 @@ import { Parameter } from './parameter/parameter';
 })
 export class App {
   protected readonly title = signal('Economia');
+  accountant = inject(Accountant);
 }

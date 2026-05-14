@@ -1,8 +1,9 @@
 <main class="main">
   <div class="content m-5">
     <h1 class="text-2xl font-bold mb-4">Economia</h1>
-    <parameter label="Interest Rate"></parameter>
-    <parameter label="Inflation Rate"></parameter>
+    <parameter label="Account balance" (valueChangedEvent)="accountant.setBalance($event)"></parameter>
+    <parameter label="Investment sum" (valueChangedEvent)="accountant.setInvestmentSum($event)"></parameter>
+    <button (click)="accountant.calculateLoan()">Calculate Loan</button>
   </div>
 </main>
 
