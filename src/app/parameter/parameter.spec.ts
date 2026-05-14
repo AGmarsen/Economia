@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NumberPicker } from './number-picker';
+import { Parameter } from './parameter';
 
-describe('NumberPicker', () => {
-  let component: NumberPicker;
-  let fixture: ComponentFixture<NumberPicker>;
+describe('Parameter', () => {
+  let component: Parameter;
+  let fixture: ComponentFixture<Parameter>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NumberPicker],
+      imports: [Parameter],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(NumberPicker);
+    fixture = TestBed.createComponent(Parameter);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
