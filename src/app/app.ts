@@ -1,15 +1,16 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Parameter } from './parameter/parameter';
-import { Accountant } from './accountant';
+import { AccountantService } from './accountantService';
+import { CalculatedField } from "./calculated-field/calculated-field";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Parameter],
+  imports: [RouterOutlet, Parameter, CalculatedField],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   protected readonly title = signal('Economia');
-  accountant = inject(Accountant);
+  accountantService = inject(AccountantService);
 }

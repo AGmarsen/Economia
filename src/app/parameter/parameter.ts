@@ -6,16 +6,15 @@ import { Component, input, output } from '@angular/core';
   template: `
     <div class="">
       <p>{{label()}}</p>
-      <input class="manual-input" [value]="internalValue" type="number" placeholder="Enter {{ label() }}" (input)="parameterSet()">
+      <input #inputField class="manual-input" type="number" placeholder="Enter {{ label().toLowerCase() }}" (input)="parameterSet(inputField.valueAsNumber)" />
     </div>
   `,
 })
 export class Parameter {
   label = input<string>('Label');
-  internalValue: number = 0;
   valueChangedEvent = output<number>();
 
-  parameterSet() {
-    this.valueChangedEvent.emit(+this.internalValue);
+  parameterSet(value: number) {
+    this.valueChangedEvent.emit(value);
   }
 }
