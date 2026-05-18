@@ -2,6 +2,15 @@
 
 @import 'tailwindcss';
 
-.manual-input {
-  @apply border rounded bg-green-300
+.parameter-field {
+  @apply border rounded bg-green-300 p-1 mb-2
 }
+
+.calculated-field {
+  @apply border rounded bg-yellow-300 w-fit p-1 mb-2
+}
+
+.primary-button {
+  @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2
+}
+

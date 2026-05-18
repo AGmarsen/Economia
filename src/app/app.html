@@ -1,12 +1,12 @@
 <main class="main">
   <div class="content m-5">
     <h1 class="text-2xl font-bold mb-4">Economia</h1>
-    <parameter label="Account balance" (valueChangedEvent)="accountantService.setBalance($event)"></parameter>
-    <parameter label="Investment sum" (valueChangedEvent)="accountantService.setInvestmentSum($event)"></parameter>
+    <parameter label="Down payment" (valueChangedEvent)="accountantService.setDownPayment($event)"/>
+    <parameter label="Purchase price" (valueChangedEvent)="accountantService.setInvestmentSum($event)"/>
 
-    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" (click)="accountantService.calculateLoan()">Calculate Loan</button>
-
-    <calculated-field label="Calculated Loan"/>
+    <calculated-field label="Calculated loan" [value]="accountantService.loanAmount()"/>
+    <calculated-field [label]="'Mortgage loan (' + (accountantService.mortgageCover() * 100) + '%)'" [value]="accountantService.mortgageLoan()"/>
+    <calculated-field label="Bank loan" [value]="accountantService.bankLoan()"/>
   </div>
 </main>
 

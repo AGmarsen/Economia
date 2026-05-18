@@ -1,13 +1,15 @@
-import { Component, inject, input } from '@angular/core';
-import { AccountantService } from '../accountantService';
+import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'calculated-field',
   imports: [],
-  template: '<p>{{ label() }}: {{ accountantService.loanAmount() }}</p>',
+  template: `
+  <div class="calculated-field">
+    <p>{{ label() }}: {{ value() }}</p>
+  </div>
+  `,
 })
 export class CalculatedField {
   label = input<string>('');
-  accountantService = inject(AccountantService);
-
+  value = input<number>(0);
 }

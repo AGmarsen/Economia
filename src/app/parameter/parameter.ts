@@ -6,7 +6,7 @@ import { Component, input, output } from '@angular/core';
   template: `
     <div class="">
       <p>{{label()}}</p>
-      <input #inputField class="manual-input" type="number" placeholder="Enter {{ label().toLowerCase() }}" (input)="parameterSet(inputField.valueAsNumber)" />
+      <input #inputField class="parameter-field" type="number" placeholder="Enter {{ label().toLowerCase() }}" (input)="parameterSet(inputField.valueAsNumber)" />
     </div>
   `,
 })
