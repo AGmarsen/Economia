@@ -5,7 +5,7 @@ import { Component, input } from '@angular/core';
   imports: [],
   template: `
   <div class="calculated-field">
-    <p>{{ label() }}: {{ value() ? value() : 0 }}</p>
+    <p>{{ label() }}: {{ value() ? value().toLocaleString() : 0 }}</p>
   </div>
   `,
 })

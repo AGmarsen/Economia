@@ -1,13 +1,19 @@
 import { Injectable, signal } from '@angular/core';
+import { delay } from 'rxjs';
 
 // Handles all the economic math
 @Injectable({
   providedIn: 'root',
 })
 export class AccountantService {
+  // parameters
   private downPayment: number = 0;
   private investmentSum: number = 0;
+  private bankLoanInterestRate: number = 0;
+  private mortgageLoanInterestRate: number = 0;
+  private loanTermYears: number = 0;
 
+  // calculated values
   private _loanAmount = signal<number>(0);
   loanAmount = this._loanAmount.asReadonly();
 
@@ -20,46 +26,90 @@ export class AccountantService {
   private _mortgageLoan = signal<number>(0);
   mortgageLoan = this._mortgageLoan.asReadonly();
 
-  private _bankLoanInterestRate = signal<number>(0);
-  bankLoanInterestRate = this._bankLoanInterestRate.asReadonly();
-
-  private _mortgageLoanInterestRate = signal<number>(0);
-  mortgageLoanInterestRate = this._mortgageLoanInterestRate.asReadonly();
-
-  private _loanTermYears = signal<number>(0);
-  loanTermYears = this._loanTermYears.asReadonly();
+  constructor() {
+    this.loadFromLocalStorage();
+  }
 
   setDownPayment(downPayment: number) {
     this.downPayment = this.roundToCurrency(downPayment);
     this.calculateLoan();
+  }
+  getDownPayment(): number {
+    return this.downPayment;
   }
 
   setInvestmentSum(sum: number) {
     this.investmentSum = this.roundToCurrency(sum);
     this.calculateLoan();
   }
+  getInvestmentSum(): number {
+    return this.investmentSum;
+  }
 
   calculateLoan() {
     this._loanAmount.set(this.roundToCurrency(this.investmentSum - this.downPayment));
     this._mortgageLoan.set(Math.min(this._loanAmount(), this.roundToCurrency(this.investmentSum * this._mortgageCover())));
     this._bankLoan.set(this.roundToCurrency(this._loanAmount() - this._mortgageLoan()));
+    this.saveToLocalStorage();
+  }
+  getLoanAmount(): number {
+    return this._loanAmount();
   }
 
   setBankLoanInterestRate(rate: number) {
-    this._bankLoanInterestRate.set(rate);
+    this.bankLoanInterestRate = rate;
+  }
+  getBankLoanInterestRate(): number {
+    return this.bankLoanInterestRate;
   }
 
   setMortgageLoanInterestRate(rate: number) {
-    this._mortgageLoanInterestRate.set(rate);
+    this.mortgageLoanInterestRate = rate;
+  }
+  getMortgageLoanInterestRate(): number {
+    return this.mortgageLoanInterestRate;
   }
 
   setLoanTerm(term: number) {
-    this._loanTermYears.set(term);
+    this.loanTermYears = term;
+  }
+  getLoanTerm(): number {
+    return this.loanTermYears;
   }
 
 
+
+  // Utililites
+
   roundToCurrency(value: number): number {
     return Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+
+  saveToLocalStorage() {
+    const data = {
+      downPayment: this.downPayment,
+      investmentSum: this.investmentSum,
+      loanAmount: this._loanAmount(),
+      mortgageLoan: this._mortgageLoan(),
+      bankLoan: this._bankLoan(),
+      mortgageCover: this._mortgageCover(),
+      bankLoanInterestRate: this.bankLoanInterestRate,
+      mortgageLoanInterestRate: this.mortgageLoanInterestRate,
+      loanTermYears: this.loanTermYears
+    };
+    localStorage.setItem('accountantData', JSON.stringify(data));
+  }
+
+  loadFromLocalStorage() {
+    const dataString = localStorage.getItem('accountantData');
+    if (dataString) {
+      const data = JSON.parse(dataString);
+      this.setDownPayment(data.downPayment);
+      this.setInvestmentSum(data.investmentSum);
+      this.setBankLoanInterestRate(data.bankLoanInterestRate);
+      this.setMortgageLoanInterestRate(data.mortgageLoanInterestRate);
+      this.setLoanTerm(data.loanTermYears);
+    }
   }
 
 }
