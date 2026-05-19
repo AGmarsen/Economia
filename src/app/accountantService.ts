@@ -1,30 +1,24 @@
 import { Injectable, signal } from '@angular/core';
-import { delay } from 'rxjs';
+import { Loan } from './loan';
 
-// Handles all the economic math
 @Injectable({
   providedIn: 'root',
 })
 export class AccountantService {
-  // parameters
+
+  // top levelparameters
   private downPayment: number = 0;
-  private investmentSum: number = 0;
-  private bankLoanInterestRate: number = 0;
-  private mortgageLoanInterestRate: number = 0;
-  private loanTermYears: number = 0;
+  private purchasePrice: number = 0;
 
-  // calculated values
-  private _loanAmount = signal<number>(0);
-  loanAmount = this._loanAmount.asReadonly();
+  private totalLoan = signal(0);
+  loanAmount = this.totalLoan.asReadonly();
 
-  private _mortgageCover = signal<number>(0.8);
-  mortgageCover = this._mortgageCover.asReadonly();
-  
-  private _bankLoan = signal<number>(0);
-  bankLoan = this._bankLoan.asReadonly();
-  
-  private _mortgageLoan = signal<number>(0);
-  mortgageLoan = this._mortgageLoan.asReadonly();
+  private _loans = signal<Loan[]>([]);
+  loans = this._loans.asReadonly();
+
+  // how much of the total loan is covered by [downPayement, loan1, loan2, ...]
+  private _coverPercentages = signal<number[]>([]);
+  coverPercentages = this._coverPercentages.asReadonly();
 
   constructor() {
     this.loadFromLocalStorage();
@@ -38,46 +32,29 @@ export class AccountantService {
     return this.downPayment;
   }
 
-  setInvestmentSum(sum: number) {
-    this.investmentSum = this.roundToCurrency(sum);
+  setPurchasePrice(price: number) {
+    this.purchasePrice = this.roundToCurrency(price);
     this.calculateLoan();
   }
-  getInvestmentSum(): number {
-    return this.investmentSum;
+  getPurchasePrice(): number {
+    return this.purchasePrice;
   }
 
   calculateLoan() {
-    this._loanAmount.set(this.roundToCurrency(this.investmentSum - this.downPayment));
-    this._mortgageLoan.set(Math.min(this._loanAmount(), this.roundToCurrency(this.investmentSum * this._mortgageCover())));
-    this._bankLoan.set(this.roundToCurrency(this._loanAmount() - this._mortgageLoan()));
-    this.saveToLocalStorage();
-  }
-  getLoanAmount(): number {
-    return this._loanAmount();
-  }
-
-  setBankLoanInterestRate(rate: number) {
-    this.bankLoanInterestRate = rate;
-  }
-  getBankLoanInterestRate(): number {
-    return this.bankLoanInterestRate;
+    this.totalLoan.set(this.roundToCurrency(this.purchasePrice - this.downPayment));
+    if (this.coverPercentages().length === 0) {
+      const downPaymentCovered = this.downPayment / this.purchasePrice;
+      this._coverPercentages.set([downPaymentCovered, 1 - downPaymentCovered]);
+    }
+    const loans = this.coverPercentages().map(cover =>
+      new Loan(`Loan ${this._loans().length + 1}`, this.roundToCurrency(this.totalLoan() * cover), 0));
+    this._loans.set(loans);
   }
 
-  setMortgageLoanInterestRate(rate: number) {
-    this.mortgageLoanInterestRate = rate;
+  loanCovered(): boolean {
+    const totalCovered = this.loans().reduce((acc, loan) => acc + loan.amount, this.downPayment);
+    return totalCovered - this.purchasePrice >= 0;
   }
-  getMortgageLoanInterestRate(): number {
-    return this.mortgageLoanInterestRate;
-  }
-
-  setLoanTerm(term: number) {
-    this.loanTermYears = term;
-  }
-  getLoanTerm(): number {
-    return this.loanTermYears;
-  }
-
-
 
   // Utililites
 
@@ -88,14 +65,7 @@ export class AccountantService {
   saveToLocalStorage() {
     const data = {
       downPayment: this.downPayment,
-      investmentSum: this.investmentSum,
-      loanAmount: this._loanAmount(),
-      mortgageLoan: this._mortgageLoan(),
-      bankLoan: this._bankLoan(),
-      mortgageCover: this._mortgageCover(),
-      bankLoanInterestRate: this.bankLoanInterestRate,
-      mortgageLoanInterestRate: this.mortgageLoanInterestRate,
-      loanTermYears: this.loanTermYears
+      purchasePrice: this.purchasePrice
     };
     localStorage.setItem('accountantData', JSON.stringify(data));
   }
@@ -105,10 +75,7 @@ export class AccountantService {
     if (dataString) {
       const data = JSON.parse(dataString);
       this.setDownPayment(data.downPayment);
-      this.setInvestmentSum(data.investmentSum);
-      this.setBankLoanInterestRate(data.bankLoanInterestRate);
-      this.setMortgageLoanInterestRate(data.mortgageLoanInterestRate);
-      this.setLoanTerm(data.loanTermYears);
+      this.setPurchasePrice(data.purchasePrice)
     }
   }
 

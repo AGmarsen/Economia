@@ -1,0 +1,7 @@
+@for(loan of accountantService.loans(); track loan) {
+<div>
+    <p>Amount: {{loan.amount}}</p>
+    <p>Interest rate: {{loan.interestRate}}</p>
+</div>
+<p>loan-list works!</p>
+}

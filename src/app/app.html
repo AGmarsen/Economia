@@ -1,26 +1,14 @@
 <main class="main">
   <div class="content m-5">
     <h1 class="text-2xl font-bold mb-4">Economia</h1>
+    <!-- Top level parameters -->
     <div class="flex">
-      <div class="section">
-        <h2>Loan Calculator</h2>
-        <parameter label="Down payment" (valueChangedEvent)="accountantService.setDownPayment($event)" [value]="accountantService.getDownPayment()"/>
-        <parameter label="Purchase price" (valueChangedEvent)="accountantService.setInvestmentSum($event)" [value]="accountantService.getInvestmentSum()"/>
-
-        <calculated-field label="Calculated loan" [value]="accountantService.loanAmount()"/>
-        <calculated-field [label]="'Mortgage loan (' + (accountantService.mortgageCover() * 100) + '%)'" [value]="accountantService.mortgageLoan()"/>
-        <calculated-field label="Bank loan" [value]="accountantService.bankLoan()"/>
-      </div>
-
-      
-      <div class="section">
-        <h2>Loan Details</h2>
-        <parameter label="Bank loan interest rate (%)" (valueChangedEvent)="accountantService.setBankLoanInterestRate($event)" [value]="accountantService.getBankLoanInterestRate()"/>
-        <parameter label="Mortgage loan interest rate (%)" (valueChangedEvent)="accountantService.setMortgageLoanInterestRate($event)" [value]="accountantService.getMortgageLoanInterestRate()"/>
-        <parameter label="Loan term (years)" (valueChangedEvent)="accountantService.setLoanTerm($event)" [value]="accountantService.getLoanTerm()"/>
-      </div>
-    
+      <parameter label="Down payment" (valueChangedEvent)="accountantService.setDownPayment($event)" [value]="accountantService.getDownPayment()"/>
+      <parameter label="Purchase price" (valueChangedEvent)="accountantService.setPurchasePrice($event)" [value]="accountantService.getPurchasePrice()"/>
+      <calculated-field label="Total loan amount" [value]="accountantService.loanAmount()"/>
     </div>
+
+    <loan-list/>
       
   </div>
 </main>
