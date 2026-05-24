@@ -1,16 +1,28 @@
 <main class="main">
   <div class="content m-5">
     <h1 class="text-2xl font-bold mb-4">Economia</h1>
-    <!-- Top level parameters -->
-    <div class="flex">
-      <parameter label="Down payment" (valueChangedEvent)="accountantService.setDownPayment($event)" [value]="accountantService.getDownPayment()"/>
-      <parameter label="Purchase price" (valueChangedEvent)="accountantService.setPurchasePrice($event)" [value]="accountantService.getPurchasePrice()"/>
-      <button class="primary-button" (click)="accountantService.calculateLoans()">Calculate loans</button>
+
+    <div>
+      <p>Purchase price</p>
+      <input #purchasePrice class="parameter-field" label="Purchase price" type="number" (input)="accountantService.setPurchasePrice(purchasePrice.valueAsNumber)"
+        [value]="accountantService.getPurchasePrice()" />
     </div>
 
-    <loan-list/>
-    <calculated-field label="Total loan amount" [value]="accountantService.totalLoan()"/>
-      
+    <div class="flex">
+      <input class="editable-label" value="Down payment" />
+      <div> 
+        <p>Amount</p>
+      <input #downPayment class="parameter-field" type="number" label="Amount" (input)="accountantService.setDownPayment(downPayment.valueAsNumber)"
+        [value]="util.roundTwoDecimals(accountantService.getDownPayment())" />
+        </div>
+      <div>
+        <p>Coverage %</p>
+      <input class="parameter-field" type="number" label="Coverage %" [value]="util.roundTwoDecimals(accountantService.downPaymentPercentage() * 100)" />
+      </div>
+    </div>
+    <loan-list />
+    <calculated-field label="Total loan amount" [value]="accountantService.totalLoan()" />
+
   </div>
 </main>
 

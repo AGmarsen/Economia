@@ -1,12 +1,24 @@
-<p>Down payment coverage: {{(accountantService.downPaymentPercentage() * 100).toFixed(2)}}%</p>
-
-
 @for(loan of accountantService.loans(); track loan; let i = $index) {
-    
+
 <div class="flex">
-    <input class="editable-label" [value]="loan.label" (input)="loan.label = $event.target.value" placeholder="Loan name"/>
-    <parameter label="Amount" (valueChangedEvent)="loan.amount = $event; loan.calculateAndSetCoverage(accountantService.totalLoan())" [value]="loan.amount"/>
-    <parameter label="Cover percentage" (valueChangedEvent)="loan.coverage = $event / 100; loan.calculateAndSetAmount(accountantService.totalLoan())" [value]="loan.coverage * 100"/>
+    <input class="editable-label" [value]="loan.label" (input)="loan.label = $event.target.value"
+        placeholder="Loan name" />
+    <div>
+        <p>Amount</p>
+        <input #amountInput class="parameter-field" type="number"
+            (input)="loan.amount = amountInput.valueAsNumber; loan.calculateAndSetCoverage(accountantService.totalLoan())"
+            [value]="util.roundTwoDecimals(loan.amount)" />
+    </div>
+    <div>
+        <p>Coverage %</p>
+        <input #coverageInput class="parameter-field" type="number"
+            (input)="loan.coverage = coverageInput.valueAsNumber / 100; loan.calculateAndSetAmount(accountantService.totalLoan())"
+            [value]="util.roundTwoDecimals(loan.coverage * 100)" />
+    </div>
+    <div>
+        <br>
+        <button class="remove-button" (click)="accountantService.removeLoan(loan)">Remove</button>
+    </div>
 </div>
 }
 

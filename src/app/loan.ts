@@ -1,5 +1,3 @@
-import { Utility } from "./utility";
-
 export class Loan {
     private readonly monthlyInterestRate: number;
     coverage: number = 0;
@@ -8,11 +6,11 @@ export class Loan {
     }
 
     calculateAndSetCoverage(totalLoan: number) {
-        this.coverage = Utility.roundTwoDecimals(totalLoan <= 0 ? 1 : this.amount / totalLoan);
+        this.coverage = totalLoan <= 0 ? 1 : this.amount / totalLoan;
     }
 
     calculateAndSetAmount(totalLoan: number) {
-        this.amount = Utility.roundTwoDecimals(totalLoan * this.coverage);
+        this.amount = totalLoan * this.coverage;
     }
 
     calculateMonthlyPayment(loanTermYears: number): number {
@@ -21,7 +19,7 @@ export class Loan {
         return 0;
       }
       // m = A * (r * (1 + r)^n) / ((1 + r)^n - 1)
-      return Utility.roundTwoDecimals(this.amount * (this.monthlyInterestRate * Math.pow(1 + this.monthlyInterestRate, numberOfPayments)) / (Math.pow(1 + this.monthlyInterestRate, numberOfPayments) - 1));
+      return this.amount * (this.monthlyInterestRate * Math.pow(1 + this.monthlyInterestRate, numberOfPayments)) / (Math.pow(1 + this.monthlyInterestRate, numberOfPayments) - 1);
     }
 
     calculateLoanTermYears(monthlyPayment: number): number {
@@ -33,15 +31,15 @@ export class Loan {
       }
       // n = -log(1 - r * A / m) / log(1 + r)
       const loanTermMonths = -Math.log(1 - this.monthlyInterestRate * this.amount / monthlyPayment) / Math.log(1 + this.monthlyInterestRate);
-      return Utility.roundTwoDecimals(loanTermMonths / 12);
+      return loanTermMonths / 12;
     }
 
     calculateInterestOnlyPayment(interestAppliedBeforePayment=true): number {
         if (interestAppliedBeforePayment) {
             // m = A * r
-            return Utility.roundTwoDecimals(this.amount * (this.monthlyInterestRate));
+            return this.amount * (this.monthlyInterestRate);
         }
         // m = A - A / (1 + r)
-        return Utility.roundTwoDecimals(this.amount - this.amount / (1 + this.monthlyInterestRate));
+        return this.amount - this.amount / (1 + this.monthlyInterestRate);
     }
 }

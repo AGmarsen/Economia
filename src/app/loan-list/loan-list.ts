@@ -1,12 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { AccountantService } from '../accountantService';
-import { Parameter } from "../parameter/parameter";
+import { Utility } from '../utility';
 
 @Component({
   selector: 'loan-list',
-  imports: [Parameter],
+  imports: [],
   templateUrl: './loan-list.html',
 })
 export class LoanList {
   accountantService = inject(AccountantService);
+  util = Utility;
 }

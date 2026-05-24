@@ -1,6 +1,5 @@
 import { Injectable, signal } from '@angular/core';
 import { Loan } from './loan';
-import { Utility } from './utility';
 
 @Injectable({
   providedIn: 'root',
@@ -25,21 +24,25 @@ export class AccountantService {
   }
 
   setDownPayment(downPayment: number) {
-    this.downPayment = Utility.roundTwoDecimals(downPayment);
+    this.downPayment = downPayment;
+    this.calculateLoans();
+    this.saveToLocalStorage();
   }
   getDownPayment(): number {
     return this.downPayment;
   }
 
   setPurchasePrice(price: number) {
-    this.purchasePrice = Utility.roundTwoDecimals(price);
+    this.purchasePrice = price;
+    this.calculateLoans();
+    this.saveToLocalStorage();
   }
   getPurchasePrice(): number {
     return this.purchasePrice;
   }
 
   calculateLoans() {
-    this._totalLoan.set(Utility.roundTwoDecimals(this.purchasePrice - this.downPayment));
+    this._totalLoan.set(this.purchasePrice - this.downPayment);
     this._downPaymentPercentage.set(this.downPayment / this.purchasePrice);
     if (this.loans().length === 0 && this.totalLoan() > 0) {
       this.addLoan();
@@ -57,6 +60,10 @@ export class AccountantService {
     this._loans.set([...this.loans(), newLoan]);
   }
 
+  removeLoan(loanToRemove: Loan) {
+    this._loans.set(this.loans().filter(loan => loan !== loanToRemove));
+  }
+
   calculateTotalCoverage(): number {
     const totalCovered = this.loans().reduce((acc, loan) => acc + loan.coverage, this._downPaymentPercentage());
     return totalCovered > 1 ? 1 : totalCovered;
@@ -66,7 +73,8 @@ export class AccountantService {
   saveToLocalStorage() {
     const data = {
       downPayment: this.downPayment,
-      purchasePrice: this.purchasePrice
+      purchasePrice: this.purchasePrice,
+      loans: this.loans().map(loan => ({ label: loan.label, amount: loan.amount, interestRate: loan.interestRate }))
     };
     localStorage.setItem('accountantData', JSON.stringify(data));
   }
@@ -76,7 +84,17 @@ export class AccountantService {
     if (dataString) {
       const data = JSON.parse(dataString);
       this.setDownPayment(data.downPayment);
-      this.setPurchasePrice(data.purchasePrice)
+      this.setPurchasePrice(data.purchasePrice);
+      if (data.loans && Array.isArray(data.loans)) {
+        const loadedLoans = data.loans.map((loanData: any) => {
+          const loan = new Loan(loanData.label, loanData.amount, loanData.interestRate);
+          loan.calculateAndSetCoverage(this.totalLoan());
+          return loan;
+        });
+        this._loans.set(loadedLoans);
+      } else {
+        this._loans.set([]);
+      }
     }
   }
 

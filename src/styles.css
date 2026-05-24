@@ -1,7 +1,11 @@
 @import 'tailwindcss';
 
 .parameter-field {
-  @apply border rounded bg-green-300 p-1 mb-2
+  @apply border rounded bg-green-300 p-1 mb-2 mr-2
+}
+
+.disabled {
+  @apply bg-gray-300 cursor-not-allowed
 }
 
 .calculated-field {
@@ -16,10 +20,14 @@
   @apply bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mb-2
 }
 
+.remove-button {
+  @apply bg-red-500 hover:bg-red-700 text-white font-bold rounded p-1 h-fit 
+}
+
 h2 {
   @apply text-xl font-bold mb-2
 }
 
 .editable-label {
-  @apply text-sm text-gray-600 mb-1
+  @apply text-sm text-gray-600 mb-1 w-fit underline cursor-pointer
 }
