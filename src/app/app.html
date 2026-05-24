@@ -4,24 +4,29 @@
 
     <div>
       <p>Purchase price</p>
-      <input #purchasePrice class="parameter-field" label="Purchase price" type="number" (input)="accountantService.setPurchasePrice(purchasePrice.valueAsNumber)"
+      <input #purchasePrice class="parameter-field" label="Purchase price" type="number"
+        (input)="accountantService.setPurchasePrice(purchasePrice.valueAsNumber)"
         [value]="accountantService.getPurchasePrice()" />
     </div>
 
     <div class="flex">
       <input class="editable-label" value="Down payment" />
-      <div> 
+      <div>
         <p>Amount</p>
-      <input #downPayment class="parameter-field" type="number" label="Amount" (input)="accountantService.setDownPayment(downPayment.valueAsNumber)"
-        [value]="util.roundTwoDecimals(accountantService.getDownPayment())" />
-        </div>
+        <input #downPayment class="parameter-field" type="number" label="Amount"
+          (input)="accountantService.setDownPayment(downPayment.valueAsNumber)"
+          [value]="util.roundTwoDecimals(accountantService.downPayment())" />
+      </div>
       <div>
         <p>Coverage %</p>
-      <input class="parameter-field" type="number" label="Coverage %" [value]="util.roundTwoDecimals(accountantService.downPaymentPercentage() * 100)" />
+        <input #downPaymentCoverage class="parameter-field" type="number" label="Coverage %"
+          (input)="accountantService.setDownPaymentCoverage(downPaymentCoverage.valueAsNumber / 100)"
+          [value]="util.roundTwoDecimals(accountantService.downPaymentCoverage() * 100)" />
       </div>
     </div>
     <loan-list />
-    <calculated-field label="Total loan amount" [value]="accountantService.totalLoan()" />
+    <calculated-field label="Total loan amount"
+      [value]="accountantService.loans().reduce((total, loan) => total + loan.amount, 0)" />
 
   </div>
 </main>

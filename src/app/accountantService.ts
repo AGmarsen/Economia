@@ -6,15 +6,13 @@ import { Loan } from './loan';
 })
 export class AccountantService {
 
-  // top levelparameters
-  private downPayment: number = 0;
   private purchasePrice: number = 0;
 
-  private _totalLoan = signal(0);
-  totalLoan = this._totalLoan.asReadonly();
+  private _downPayment = signal(0);
+  downPayment = this._downPayment.asReadonly();
 
-  private _downPaymentPercentage = signal(0);
-  downPaymentPercentage = this._downPaymentPercentage.asReadonly();
+  private _downPaymentCoverage = signal(0);
+  downPaymentCoverage = this._downPaymentCoverage.asReadonly();
 
   private _loans = signal<Loan[]>([]);
   loans = this._loans.asReadonly();
@@ -23,52 +21,68 @@ export class AccountantService {
     this.loadFromLocalStorage();
   }
 
-  setDownPayment(downPayment: number) {
-    this.downPayment = downPayment;
-    this.calculateLoans();
-    this.saveToLocalStorage();
-  }
-  getDownPayment(): number {
-    return this.downPayment;
-  }
-
   setPurchasePrice(price: number) {
     this.purchasePrice = price;
-    this.calculateLoans();
+    this.calcDownPaymentCoverage();
+    this.loans().forEach(loan => this.calcLoanAmount(loan));
     this.saveToLocalStorage();
   }
   getPurchasePrice(): number {
     return this.purchasePrice;
   }
 
-  calculateLoans() {
-    this._totalLoan.set(this.purchasePrice - this.downPayment);
-    this._downPaymentPercentage.set(this.downPayment / this.purchasePrice);
-    if (this.loans().length === 0 && this.totalLoan() > 0) {
-      this.addLoan();
-    }
-    this.loans().forEach(loan => loan.calculateAndSetAmount(this.totalLoan()));
+  setDownPayment(downPayment: number) {
+    this._downPayment.set(downPayment);
+    this.calcDownPaymentCoverage();
+    this.saveToLocalStorage();
+  }
+  private calcDownPayment() {
+    const calculatedDownPayment = this.purchasePrice * this._downPaymentCoverage();
+    this._downPayment.set(calculatedDownPayment);
+  }
+
+  setDownPaymentCoverage(coverage: number) {
+    this._downPaymentCoverage.set(coverage);
+    this.calcDownPayment();
+  }
+  private calcDownPaymentCoverage() {
+    const calculatedCoverage = this.purchasePrice <= 0 ? 1 : this._downPayment() / this.purchasePrice;
+    this._downPaymentCoverage.set(calculatedCoverage);
+  }
+
+  setLoanAmount(loan: Loan, amount: number) {
+    loan.amount = amount;
+    this.calcLoanCoverage(loan);
+    this.saveToLocalStorage();
+  }
+  private calcLoanAmount(loan: Loan) {
+    const calculatedAmount = this.purchasePrice * loan.coverage;
+    loan.amount = calculatedAmount;
+  }
+
+  setLoanCoverage(loan: Loan, coverage: number) {
+    loan.coverage = coverage;
+    this.calcLoanAmount(loan);
+    this.saveToLocalStorage();
+  }
+  private calcLoanCoverage(loan: Loan) {
+    const calculatedCoverage = this.purchasePrice <= 0 ? 1 : loan.amount / this.purchasePrice;
+    loan.coverage = calculatedCoverage;
   }
 
   addLoan() {
-    let missingAmount = this.totalLoan() * (1 - this.calculateTotalCoverage());
+    let newLoan = new Loan(`Loan ${this._loans().length + 1}`, 0, 0);
+    let missingAmount = this.purchasePrice - this.loans().reduce((total, loan) => total + loan.amount, this.downPayment());
     if (missingAmount <= 0) {
       missingAmount = 0;
     }
-    let newLoan = new Loan(`Loan ${this._loans().length + 1}`, missingAmount, 0);
-    newLoan.calculateAndSetCoverage(this.totalLoan());
+    this.setLoanAmount(newLoan, missingAmount);
     this._loans.set([...this.loans(), newLoan]);
   }
 
   removeLoan(loanToRemove: Loan) {
     this._loans.set(this.loans().filter(loan => loan !== loanToRemove));
   }
-
-  calculateTotalCoverage(): number {
-    const totalCovered = this.loans().reduce((acc, loan) => acc + loan.coverage, this._downPaymentPercentage());
-    return totalCovered > 1 ? 1 : totalCovered;
-  }
-
 
   saveToLocalStorage() {
     const data = {
@@ -85,16 +99,6 @@ export class AccountantService {
       const data = JSON.parse(dataString);
       this.setDownPayment(data.downPayment);
       this.setPurchasePrice(data.purchasePrice);
-      if (data.loans && Array.isArray(data.loans)) {
-        const loadedLoans = data.loans.map((loanData: any) => {
-          const loan = new Loan(loanData.label, loanData.amount, loanData.interestRate);
-          loan.calculateAndSetCoverage(this.totalLoan());
-          return loan;
-        });
-        this._loans.set(loadedLoans);
-      } else {
-        this._loans.set([]);
-      }
     }
   }
 

@@ -5,14 +5,6 @@ export class Loan {
         this.monthlyInterestRate = interestRate / 100 / 12;
     }
 
-    calculateAndSetCoverage(totalLoan: number) {
-        this.coverage = totalLoan <= 0 ? 1 : this.amount / totalLoan;
-    }
-
-    calculateAndSetAmount(totalLoan: number) {
-        this.amount = totalLoan * this.coverage;
-    }
-
     calculateMonthlyPayment(loanTermYears: number): number {
       const numberOfPayments = loanTermYears * 12;
       if (this.amount <= 0 || numberOfPayments < 0) {

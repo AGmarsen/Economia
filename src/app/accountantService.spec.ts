@@ -7,33 +7,26 @@ describe('Accountant', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
+    localStorage.clear();
     service = TestBed.inject(AccountantService);
+    let downPayment = Math.random();
+    let purchasePrice = downPayment + Math.random();
+    service.setDownPayment(downPayment);
+    service.setPurchasePrice(purchasePrice);
+    service.addLoan();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should calculate the loan amount', () => {
-    let downPayment = Math.random();
-    let extra = Math.random();
-    if (extra === 0) {
-      extra = 0.1;
-    }
-    let purchasePrice = downPayment + extra;
-    service.setDownPayment(downPayment);
-    service.setPurchasePrice(purchasePrice);
-    service.calculateLoans();
-    expect(service.totalLoan()).toBe(extra);
+  it('should have sum of loans and down payment equal total purchase price', () => {
+    const total = service.loans().reduce((total, loan) => total + loan.amount, service.downPayment());
+    expect(total).toEqual(service.getPurchasePrice());
   });
 
-  it('should have sum of loans should equal total loan amount', () => {
-    let downPayment = Math.random();
-    let purchasePrice = downPayment + Math.random();
-    service.setDownPayment(downPayment);
-    service.setPurchasePrice(purchasePrice);
-    service.calculateLoans();
-    expect(service.totalLoan()).toEqual(service.loans().reduce((total, loan) => total + loan.amount, 0));
+  it('should ensure all coverages add up to 100%', () => {
+    const totalCoverage = service.loans().reduce((total, loan) => total + loan.coverage, service.downPaymentCoverage());
+    expect(totalCoverage).toBeCloseTo(1, 10);
   });
-
 });
