@@ -9,8 +9,7 @@ import { Utility } from './utility';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, CalculatedField, LoanList],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  templateUrl: './app.html'
 })
 export class App {
   protected readonly title = signal('Economia');

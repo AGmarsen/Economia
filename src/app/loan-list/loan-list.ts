@@ -5,7 +5,7 @@ import { Utility } from '../utility';
 @Component({
   selector: 'loan-list',
   imports: [],
-  templateUrl: './loan-list.html',
+  templateUrl: './loan-list.html'
 })
 export class LoanList {
   accountantService = inject(AccountantService);

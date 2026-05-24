@@ -1,32 +1,42 @@
 <main class="main">
-  <div class="content m-5">
-    <h1 class="text-2xl font-bold mb-4">Economia</h1>
+  <div class="content m-5 flex flex-wrap">
+    <div class="w-full flex justify-center">
+      <h1 class="text-2xl font-bold mb-4">Economia</h1>
+    </div>
+    
+    <div class="section lg:w-1/2 w-full">
+      <h2>Loan Amounts and Coverage</h2>
+      <div>
+        <p>Purchase price</p>
+        <input #purchasePrice class="parameter-field" label="Purchase price" type="number"
+          (input)="accountantService.setPurchasePrice(purchasePrice.valueAsNumber)"
+          [value]="accountantService.getPurchasePrice()" />
+      </div>
 
-    <div>
-      <p>Purchase price</p>
-      <input #purchasePrice class="parameter-field" label="Purchase price" type="number"
-        (input)="accountantService.setPurchasePrice(purchasePrice.valueAsNumber)"
-        [value]="accountantService.getPurchasePrice()" />
+      <div class="flex">
+        <input class="editable-label" value="Down payment" />
+        <div>
+          <p>Amount</p>
+          <input #downPayment class="parameter-field" type="number" label="Amount"
+            (input)="accountantService.setDownPayment(downPayment.valueAsNumber)"
+            [value]="util.roundTwoDecimals(accountantService.downPayment())" />
+        </div>
+        <div>
+          <p>Coverage %</p>
+          <input #downPaymentCoverage class="parameter-field" type="number" label="Coverage %"
+            (input)="accountantService.setDownPaymentCoverage(downPaymentCoverage.valueAsNumber / 100)"
+            [value]="util.roundTwoDecimals(accountantService.downPaymentCoverage() * 100)" />
+        </div>
+      </div>
+      <loan-list />
+      <calculated-field label="Total loan amount"
+        [value]="accountantService.loans().reduce((total, loan) => total + loan.amount, 0)" />
+
     </div>
 
-    <div class="flex">
-      <input class="editable-label" value="Down payment" />
-      <div>
-        <p>Amount</p>
-        <input #downPayment class="parameter-field" type="number" label="Amount"
-          (input)="accountantService.setDownPayment(downPayment.valueAsNumber)"
-          [value]="util.roundTwoDecimals(accountantService.downPayment())" />
-      </div>
-      <div>
-        <p>Coverage %</p>
-        <input #downPaymentCoverage class="parameter-field" type="number" label="Coverage %"
-          (input)="accountantService.setDownPaymentCoverage(downPaymentCoverage.valueAsNumber / 100)"
-          [value]="util.roundTwoDecimals(accountantService.downPaymentCoverage() * 100)" />
-      </div>
+    <div class="section lg:w-1/2 w-full">
+      <h2>Interests and Payments</h2>
     </div>
-    <loan-list />
-    <calculated-field label="Total loan amount"
-      [value]="accountantService.loans().reduce((total, loan) => total + loan.amount, 0)" />
 
   </div>
 </main>
