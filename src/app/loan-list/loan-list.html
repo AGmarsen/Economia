@@ -1,7 +1,13 @@
-@for(loan of accountantService.loans(); track loan) {
-<div>
-    <p>Amount: {{loan.amount}}</p>
-    <p>Interest rate: {{loan.interestRate}}</p>
+<p>Down payment coverage: {{(accountantService.downPaymentPercentage() * 100).toFixed(2)}}%</p>
+
+
+@for(loan of accountantService.loans(); track loan; let i = $index) {
+    
+<div class="flex">
+    <input class="editable-label" [value]="loan.label" (input)="loan.label = $event.target.value" placeholder="Loan name"/>
+    <parameter label="Amount" (valueChangedEvent)="loan.amount = $event; loan.calculateAndSetCoverage(accountantService.totalLoan())" [value]="loan.amount"/>
+    <parameter label="Cover percentage" (valueChangedEvent)="loan.coverage = $event / 100; loan.calculateAndSetAmount(accountantService.totalLoan())" [value]="loan.coverage * 100"/>
 </div>
-<p>loan-list works!</p>
 }
+
+<button class="secondary-button" (click)="accountantService.addLoan()">Add loan</button>

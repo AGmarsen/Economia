@@ -1,7 +1,16 @@
 export class Loan {
     private readonly monthlyInterestRate: number;
+    coverage: number = 0;
     constructor(public label: string, public amount: number, public interestRate: number) {
         this.monthlyInterestRate = interestRate / 100 / 12;
+    }
+
+    calculateAndSetCoverage(totalLoan: number) {
+        this.coverage = (totalLoan <= 0 ? 1 : this.amount / totalLoan);
+    }
+
+    calculateAndSetAmount(totalLoan: number) {
+        this.amount = totalLoan * this.coverage;
     }
 
     calculateMonthlyPayment(loanTermYears: number): number {

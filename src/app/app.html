@@ -5,10 +5,11 @@
     <div class="flex">
       <parameter label="Down payment" (valueChangedEvent)="accountantService.setDownPayment($event)" [value]="accountantService.getDownPayment()"/>
       <parameter label="Purchase price" (valueChangedEvent)="accountantService.setPurchasePrice($event)" [value]="accountantService.getPurchasePrice()"/>
-      <calculated-field label="Total loan amount" [value]="accountantService.loanAmount()"/>
+      <button class="primary-button" (click)="accountantService.calculateLoans()">Calculate loans</button>
     </div>
 
     <loan-list/>
+    <calculated-field label="Total loan amount" [value]="accountantService.totalLoan()"/>
       
   </div>
 </main>

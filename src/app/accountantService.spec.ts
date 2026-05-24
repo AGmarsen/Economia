@@ -16,19 +16,24 @@ describe('Accountant', () => {
 
   it('should calculate the loan amount', () => {
     let downPayment = Math.random();
-    let investmentSum = downPayment + Math.random();
+    let extra = Math.random();
+    if (extra === 0) {
+      extra = 0.1;
+    }
+    let purchasePrice = downPayment + extra;
     service.setDownPayment(downPayment);
-    service.setInvestmentSum(investmentSum);
-    service.calculateLoan();
-    expect(service.loanAmount()).toBeGreaterThan(0);
+    service.setPurchasePrice(purchasePrice);
+    service.calculateLoans();
+    expect(service.totalLoan()).toBe(extra);
   });
 
-  it('should cover total loan with mortgage plus bank loan', () => {
+  it('should have sum of loans should equal total loan amount', () => {
     let downPayment = Math.random();
-    let investmentSum = downPayment + Math.random();
+    let purchasePrice = downPayment + Math.random();
     service.setDownPayment(downPayment);
-    service.setInvestmentSum(investmentSum);
-    service.calculateLoan();
-    expect(service.loanAmount()).toEqual(service.bankLoan() + service.mortgageLoan());
+    service.setPurchasePrice(purchasePrice);
+    service.calculateLoans();
+    expect(service.totalLoan()).toEqual(service.loans().reduce((total, loan) => total + loan.amount, 0));
   });
+
 });

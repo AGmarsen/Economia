@@ -10,15 +10,14 @@ export class AccountantService {
   private downPayment: number = 0;
   private purchasePrice: number = 0;
 
-  private totalLoan = signal(0);
-  loanAmount = this.totalLoan.asReadonly();
+  private _totalLoan = signal(0);
+  totalLoan = this._totalLoan.asReadonly();
+
+  private _downPaymentPercentage = signal(0);
+  downPaymentPercentage = this._downPaymentPercentage.asReadonly();
 
   private _loans = signal<Loan[]>([]);
   loans = this._loans.asReadonly();
-
-  // how much of the total loan is covered by [downPayement, loan1, loan2, ...]
-  private _coverPercentages = signal<number[]>([]);
-  coverPercentages = this._coverPercentages.asReadonly();
 
   constructor() {
     this.loadFromLocalStorage();
@@ -26,7 +25,6 @@ export class AccountantService {
 
   setDownPayment(downPayment: number) {
     this.downPayment = this.roundToCurrency(downPayment);
-    this.calculateLoan();
   }
   getDownPayment(): number {
     return this.downPayment;
@@ -34,26 +32,33 @@ export class AccountantService {
 
   setPurchasePrice(price: number) {
     this.purchasePrice = this.roundToCurrency(price);
-    this.calculateLoan();
   }
   getPurchasePrice(): number {
     return this.purchasePrice;
   }
 
-  calculateLoan() {
-    this.totalLoan.set(this.roundToCurrency(this.purchasePrice - this.downPayment));
-    if (this.coverPercentages().length === 0) {
-      const downPaymentCovered = this.downPayment / this.purchasePrice;
-      this._coverPercentages.set([downPaymentCovered, 1 - downPaymentCovered]);
+  calculateLoans() {
+    this._totalLoan.set(this.roundToCurrency(this.purchasePrice - this.downPayment));
+    this._downPaymentPercentage.set(this.downPayment / this.purchasePrice);
+    if (this.loans().length === 0 && this.totalLoan() > 0) {
+      this.addLoan();
     }
-    const loans = this.coverPercentages().map(cover =>
-      new Loan(`Loan ${this._loans().length + 1}`, this.roundToCurrency(this.totalLoan() * cover), 0));
-    this._loans.set(loans);
+    this.loans().forEach(loan => loan.calculateAndSetAmount(this.totalLoan()));
   }
 
-  loanCovered(): boolean {
-    const totalCovered = this.loans().reduce((acc, loan) => acc + loan.amount, this.downPayment);
-    return totalCovered - this.purchasePrice >= 0;
+  addLoan() {
+    let missingAmount = this.totalLoan() * (1 - this.calculateTotalCoverage());
+    if (missingAmount <= 0) {
+      missingAmount = 0;
+    }
+    let newLoan = new Loan(`Loan ${this._loans().length + 1}`, missingAmount, 0);
+    newLoan.calculateAndSetCoverage(this.totalLoan());
+    this._loans.set([...this.loans(), newLoan]);
+  }
+
+  calculateTotalCoverage(): number {
+    const totalCovered = this.loans().reduce((acc, loan) => acc + loan.coverage, this._downPaymentPercentage());
+    return totalCovered > 1 ? 1 : totalCovered;
   }
 
   // Utililites
