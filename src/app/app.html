@@ -30,7 +30,7 @@
       </div>
       <loan-list />
       <calculated-field label="Total loan amount"
-        [value]="accountantService.loans().reduce((total, loan) => total + loan.amount, 0)" />
+        [value]="accountantService.loans().reduce((total, loan) => total + loan.getAmount(), 0)" />
 
     </div>
 

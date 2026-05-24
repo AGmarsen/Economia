@@ -17,15 +17,10 @@ export class AccountantService {
   private _loans = signal<Loan[]>([]);
   loans = this._loans.asReadonly();
 
-  constructor() {
-    this.loadFromLocalStorage();
-  }
-
   setPurchasePrice(price: number) {
     this.purchasePrice = price;
     this.calcDownPaymentCoverage();
     this.loans().forEach(loan => this.calcLoanAmount(loan));
-    this.saveToLocalStorage();
   }
   getPurchasePrice(): number {
     return this.purchasePrice;
@@ -34,7 +29,6 @@ export class AccountantService {
   setDownPayment(downPayment: number) {
     this._downPayment.set(downPayment);
     this.calcDownPaymentCoverage();
-    this.saveToLocalStorage();
   }
   private calcDownPayment() {
     const calculatedDownPayment = this.purchasePrice * this._downPaymentCoverage();
@@ -53,7 +47,6 @@ export class AccountantService {
   setLoanAmount(loan: Loan, amount: number) {
     loan.setAmount(amount);
     this.calcLoanCoverage(loan);
-    this.saveToLocalStorage();
   }
   private calcLoanAmount(loan: Loan) {
     const calculatedAmount = this.purchasePrice * loan.coverage();
@@ -63,7 +56,6 @@ export class AccountantService {
   setLoanCoverage(loan: Loan, coverage: number) {
     loan.setCoverage(coverage);
     this.calcLoanAmount(loan);
-    this.saveToLocalStorage();
   }
   private calcLoanCoverage(loan: Loan) {
     const calculatedCoverage = this.purchasePrice <= 0 ? 1 : loan.getAmount() / this.purchasePrice;
@@ -86,36 +78,15 @@ export class AccountantService {
 
   setLoanInterest(loan: Loan, interestRate: number) {
     loan.setInterestRate(interestRate);
-    this.saveToLocalStorage();
   }
 
 
   setLoanTermYears(loan: Loan, loanTermYears: number) {
     loan.setLoanTermYears(loanTermYears);
-    this.saveToLocalStorage();
   }
 
   setLoanPayment(loan: Loan, monthlyPayment: number) {
     loan.setMonthlyPayment(monthlyPayment);
-    this.saveToLocalStorage();
-  }
-
-  saveToLocalStorage() {
-    const data = {
-      downPayment: this.downPayment,
-      purchasePrice: this.purchasePrice,
-      loans: this.loans().map(loan => ({ label: loan.label, amount: loan.getAmount(), interestRate: loan.getInterestRate() }))
-    };
-    localStorage.setItem('accountantData', JSON.stringify(data));
-  }
-
-  loadFromLocalStorage() {
-    const dataString = localStorage.getItem('accountantData');
-    if (dataString) {
-      const data = JSON.parse(dataString);
-      this.setDownPayment(data.downPayment);
-      this.setPurchasePrice(data.purchasePrice);
-    }
   }
 
 }

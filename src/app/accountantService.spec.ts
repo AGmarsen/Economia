@@ -7,7 +7,6 @@ describe('Accountant', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    localStorage.clear();
     service = TestBed.inject(AccountantService);
     let downPayment = Math.random();
     let purchasePrice = downPayment + Math.random();
@@ -21,12 +20,12 @@ describe('Accountant', () => {
   });
 
   it('should have sum of loans and down payment equal total purchase price', () => {
-    const total = service.loans().reduce((total, loan) => total + loan.amount, service.downPayment());
+    const total = service.loans().reduce((total, loan) => total + loan.getAmount(), service.downPayment());
     expect(total).toEqual(service.getPurchasePrice());
   });
 
   it('should ensure all coverages add up to 100%', () => {
-    const totalCoverage = service.loans().reduce((total, loan) => total + loan.coverage, service.downPaymentCoverage());
+    const totalCoverage = service.loans().reduce((total, loan) => total + loan.coverage(), service.downPaymentCoverage());
     expect(totalCoverage).toBeCloseTo(1, 10);
   });
 });
