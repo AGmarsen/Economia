@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Loan } from './loan';
+import { Utility } from './utility';
 
 @Injectable({
   providedIn: 'root',
@@ -24,21 +25,21 @@ export class AccountantService {
   }
 
   setDownPayment(downPayment: number) {
-    this.downPayment = this.roundToCurrency(downPayment);
+    this.downPayment = Utility.roundTwoDecimals(downPayment);
   }
   getDownPayment(): number {
     return this.downPayment;
   }
 
   setPurchasePrice(price: number) {
-    this.purchasePrice = this.roundToCurrency(price);
+    this.purchasePrice = Utility.roundTwoDecimals(price);
   }
   getPurchasePrice(): number {
     return this.purchasePrice;
   }
 
   calculateLoans() {
-    this._totalLoan.set(this.roundToCurrency(this.purchasePrice - this.downPayment));
+    this._totalLoan.set(Utility.roundTwoDecimals(this.purchasePrice - this.downPayment));
     this._downPaymentPercentage.set(this.downPayment / this.purchasePrice);
     if (this.loans().length === 0 && this.totalLoan() > 0) {
       this.addLoan();
@@ -61,11 +62,6 @@ export class AccountantService {
     return totalCovered > 1 ? 1 : totalCovered;
   }
 
-  // Utililites
-
-  roundToCurrency(value: number): number {
-    return Math.round((value + Number.EPSILON) * 100) / 100;
-  }
 
   saveToLocalStorage() {
     const data = {
