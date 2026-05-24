@@ -1,4 +1,4 @@
-@for(loan of accountantService.loans(); track loan; let i = $index) {
+@for(loan of accountantService.loans(); track loan) {
 
 <div class="flex">
     <input class="editable-label" [value]="loan.label" (input)="loan.label = $event.target.value"
@@ -6,14 +6,14 @@
     <div>
         <p>Amount</p>
         <input #amountInput class="parameter-field" type="number"
-            (input)="loan.amount = amountInput.valueAsNumber; accountantService.setLoanAmount(loan, loan.amount)"
-            [value]="util.roundTwoDecimals(loan.amount)" />
+            (input)="loan.setAmount(amountInput.valueAsNumber); accountantService.setLoanAmount(loan, loan.getAmount())"
+            [value]="util.roundTwoDecimals(loan.getAmount())" />
     </div>
     <div>
         <p>Coverage %</p>
         <input #coverageInput class="parameter-field" type="number"
-            (input)="loan.coverage = coverageInput.valueAsNumber / 100; accountantService.setLoanCoverage(loan, loan.coverage)"
-            [value]="util.roundTwoDecimals(loan.coverage * 100)" />
+            (input)="loan.setCoverage(coverageInput.valueAsNumber / 100); accountantService.setLoanCoverage(loan, loan.coverage())"
+            [value]="util.roundTwoDecimals(loan.coverage() * 100)" />
     </div>
     <div>
         <br>

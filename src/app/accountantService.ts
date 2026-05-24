@@ -51,28 +51,28 @@ export class AccountantService {
   }
 
   setLoanAmount(loan: Loan, amount: number) {
-    loan.amount = amount;
+    loan.setAmount(amount);
     this.calcLoanCoverage(loan);
     this.saveToLocalStorage();
   }
   private calcLoanAmount(loan: Loan) {
-    const calculatedAmount = this.purchasePrice * loan.coverage;
-    loan.amount = calculatedAmount;
+    const calculatedAmount = this.purchasePrice * loan.coverage();
+    loan.setAmount(calculatedAmount);
   }
 
   setLoanCoverage(loan: Loan, coverage: number) {
-    loan.coverage = coverage;
+    loan.setCoverage(coverage);
     this.calcLoanAmount(loan);
     this.saveToLocalStorage();
   }
   private calcLoanCoverage(loan: Loan) {
-    const calculatedCoverage = this.purchasePrice <= 0 ? 1 : loan.amount / this.purchasePrice;
-    loan.coverage = calculatedCoverage;
+    const calculatedCoverage = this.purchasePrice <= 0 ? 1 : loan.getAmount() / this.purchasePrice;
+    loan.setCoverage(calculatedCoverage);
   }
 
   addLoan() {
     let newLoan = new Loan(`Loan ${this._loans().length + 1}`, 0, 0);
-    let missingAmount = this.purchasePrice - this.loans().reduce((total, loan) => total + loan.amount, this.downPayment());
+    let missingAmount = this.purchasePrice - this.loans().reduce((total, loan) => total + loan.getAmount(), this.downPayment());
     if (missingAmount <= 0) {
       missingAmount = 0;
     }
@@ -84,11 +84,27 @@ export class AccountantService {
     this._loans.set(this.loans().filter(loan => loan !== loanToRemove));
   }
 
+  setLoanInterest(loan: Loan, interestRate: number) {
+    loan.setInterestRate(interestRate);
+    this.saveToLocalStorage();
+  }
+
+
+  setLoanTermYears(loan: Loan, loanTermYears: number) {
+    loan.setLoanTermYears(loanTermYears);
+    this.saveToLocalStorage();
+  }
+
+  setLoanPayment(loan: Loan, monthlyPayment: number) {
+    loan.setMonthlyPayment(monthlyPayment);
+    this.saveToLocalStorage();
+  }
+
   saveToLocalStorage() {
     const data = {
       downPayment: this.downPayment,
       purchasePrice: this.purchasePrice,
-      loans: this.loans().map(loan => ({ label: loan.label, amount: loan.amount, interestRate: loan.interestRate }))
+      loans: this.loans().map(loan => ({ label: loan.label, amount: loan.getAmount(), interestRate: loan.getInterestRate() }))
     };
     localStorage.setItem('accountantData', JSON.stringify(data));
   }

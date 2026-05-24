@@ -1,0 +1,24 @@
+@for(loan of accountantService.loans(); track loan) {
+<b>{{loan.label}}</b>
+<div class="flex">
+    <div>
+        <p>Interest %</p>
+        <input #interest class="parameter-field" type="number" label="Interest %"
+            (input)="accountantService.setLoanInterest(loan, interest.valueAsNumber / 100)"
+            [value]="util.roundTwoDecimals(loan.getInterestRate() * 100)" />
+    </div>
+    <div>
+        <p>Loan term (years)</p>
+        <input #term class="parameter-field" type="number" label="Loan term (years)"
+            (input)="accountantService.setLoanTermYears(loan, term.valueAsNumber)"
+            [value]="util.roundTwoDecimals(loan.loanTermYears())" />
+    </div>
+    <div>
+        <p>Monthly payment</p>
+        <input #payment class="parameter-field" type="number" label="Monthly payment"
+            (input)="accountantService.setLoanPayment(loan, payment.valueAsNumber)"
+            [value]="util.roundTwoDecimals(loan.monthlyPayment())" />
+
+    </div>
+</div>
+}

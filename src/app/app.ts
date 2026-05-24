@@ -4,11 +4,12 @@ import { AccountantService } from './accountantService';
 import { CalculatedField } from "./calculated-field/calculated-field";
 import { LoanList } from "./loan-list/loan-list";
 import { Utility } from './utility';
+import { InterestList } from "./interest-list/interest-list";
 
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CalculatedField, LoanList],
+  imports: [RouterOutlet, CalculatedField, LoanList, InterestList],
   templateUrl: './app.html'
 })
 export class App {

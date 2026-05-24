@@ -1,37 +1,80 @@
+import { signal } from "@angular/core";
+
 export class Loan {
-    private readonly monthlyInterestRate: number;
-    coverage: number = 0;
-    constructor(public label: string, public amount: number, public interestRate: number) {
-        this.monthlyInterestRate = interestRate / 100 / 12;
+
+    private _coverage = signal(0);
+    coverage = this._coverage.asReadonly();
+
+    private _loanTermYears = signal(0);
+    loanTermYears = this._loanTermYears.asReadonly();
+
+    private _monthlyPayment = signal(0);
+    monthlyPayment = this._monthlyPayment.asReadonly();
+
+
+    constructor(public label: string, private amount: number, private interestRate: number) { }
+
+    private monthlyInterestRate(): number {
+        return this.interestRate / 12;
     }
 
-    calculateMonthlyPayment(loanTermYears: number): number {
-      const numberOfPayments = loanTermYears * 12;
-      if (this.amount <= 0 || numberOfPayments < 0) {
-        return 0;
-      }
-      // m = A * (r * (1 + r)^n) / ((1 + r)^n - 1)
-      return this.amount * (this.monthlyInterestRate * Math.pow(1 + this.monthlyInterestRate, numberOfPayments)) / (Math.pow(1 + this.monthlyInterestRate, numberOfPayments) - 1);
+    setAmount(amount: number) {
+        this.amount = amount;
+        this.calcMonthlyPayment();
+    }
+    getAmount(): number {
+        return this.amount;
     }
 
-    calculateLoanTermYears(monthlyPayment: number): number {
+    setInterestRate(interestRate: number) {
+        this.interestRate = interestRate;
+        this.calcMonthlyPayment();
+    }
+    getInterestRate(): number {
+        return this.interestRate;
+    }
+
+    setCoverage(coverage: number) {
+        this._coverage.set(coverage);
+    }
+
+    setLoanTermYears(loanTermYears: number) {
+        this._loanTermYears.set(loanTermYears);
+        this.calcMonthlyPayment();
+    }
+    calcLoanTermYears() {
       if (this.amount <= 0) {
-        return 0;
+        this._loanTermYears.set(0);
       }
-      if (monthlyPayment <= 0) {
-        return Infinity;
+      if (this.monthlyPayment() <= 0) {
+        this._loanTermYears.set(Infinity);
       }
       // n = -log(1 - r * A / m) / log(1 + r)
-      const loanTermMonths = -Math.log(1 - this.monthlyInterestRate * this.amount / monthlyPayment) / Math.log(1 + this.monthlyInterestRate);
-      return loanTermMonths / 12;
+      const loanTermMonths = -Math.log(1 - this.monthlyInterestRate() * this.amount / this.monthlyPayment()) / Math.log(1 + this.monthlyInterestRate());
+      this._loanTermYears.set(loanTermMonths / 12);
     }
 
-    calculateInterestOnlyPayment(interestAppliedBeforePayment=true): number {
+    setMonthlyPayment(monthlyPayment: number) {
+        this._monthlyPayment.set(monthlyPayment);
+        this.calcLoanTermYears();
+    }
+    calcMonthlyPayment() {
+      const numberOfPayments = this.loanTermYears() * 12;
+      if (this.amount <= 0 || numberOfPayments < 0) {
+        this._monthlyPayment.set(0);
+        return;
+      }
+      // m = A * (r * (1 + r)^n) / ((1 + r)^n - 1)
+      const m = this.amount * (this.monthlyInterestRate() * Math.pow(1 + this.monthlyInterestRate(), numberOfPayments)) / (Math.pow(1 + this.monthlyInterestRate(), numberOfPayments) - 1)
+      this._monthlyPayment.set(m);
+    }
+
+    getInterestOnlyPayment(interestAppliedBeforePayment=true): number {
         if (interestAppliedBeforePayment) {
             // m = A * r
-            return this.amount * (this.monthlyInterestRate);
+            return this.amount * (this.monthlyInterestRate());
         }
         // m = A - A / (1 + r)
-        return this.amount - this.amount / (1 + this.monthlyInterestRate);
+        return this.amount - this.amount / (1 + this.monthlyInterestRate());
     }
 }
