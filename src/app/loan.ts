@@ -45,9 +45,11 @@ export class Loan {
     calcLoanTermYears() {
       if (this.amount <= 0) {
         this._loanTermYears.set(0);
+        return;
       }
       if (this.monthlyPayment() <= 0) {
         this._loanTermYears.set(Infinity);
+        return;
       }
       // n = -log(1 - r * A / m) / log(1 + r)
       const loanTermMonths = -Math.log(1 - this.monthlyInterestRate() * this.amount / this.monthlyPayment()) / Math.log(1 + this.monthlyInterestRate());
@@ -76,5 +78,31 @@ export class Loan {
         }
         // m = A - A / (1 + r)
         return this.amount - this.amount / (1 + this.monthlyInterestRate());
+    }
+
+    getPerPaymentStats(): { payment: number; interest: number; remaining: number }[] {
+        let numberOfPayments = this.loanTermYears() * 12;
+        if (numberOfPayments <= 0) {
+            return [];
+        }
+        if (numberOfPayments === Infinity) {
+            numberOfPayments = 1200;
+        }
+        let remainingAmount = this.amount;
+        const monthlyInterestRate = this.monthlyInterestRate();
+        const monthlyPayment = this.monthlyPayment();
+        const stats : { payment: number; interest: number; remaining: number }[] = [];
+
+        for (let i = 0; i < numberOfPayments; i++) {
+            let interest = remainingAmount * monthlyInterestRate;
+            remainingAmount += interest;
+            remainingAmount -= monthlyPayment;
+            stats.push({
+                payment: monthlyPayment,
+                interest: interest,
+                remaining: remainingAmount
+            });
+        }
+        return stats;
     }
 }

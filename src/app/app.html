@@ -38,6 +38,11 @@
       <h2>Interests and Payments</h2>
       <interest-list />
     </div>
+    <div>
+      @for(loan of accountantService.loans(); track loan) {
+        <per-payment-graph [loan]="loan"/>
+      }
+    </div>
 
   </div>
 </main>
