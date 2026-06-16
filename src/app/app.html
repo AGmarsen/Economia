@@ -3,7 +3,7 @@
     <div class="w-full flex justify-center">
       <h1 class="text-2xl font-bold mb-4">Economia</h1>
     </div>
-    
+
     <div class="section lg:w-1/2 w-full">
       <h2>Loan Amounts and Coverage</h2>
       <div>
@@ -38,9 +38,10 @@
       <h2>Interests and Payments</h2>
       <interest-list />
     </div>
-    <div>
+
+    <div class="w-full">
       @for(loan of accountantService.loans(); track loan) {
-        <per-payment-graph [loan]="loan"/>
+      <per-payment-graph [loan]="loan" />
       }
     </div>
 

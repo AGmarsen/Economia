@@ -1,50 +1,69 @@
-import { Component, inject, input, computed } from '@angular/core';
+import { Component, inject, input, computed, effect, ViewChild, ElementRef } from '@angular/core';
 import { AccountantService } from '../accountantService';
 import { Utility } from '../utility';
 import { CalculatedField } from '../calculated-field/calculated-field';
+import { ReactiveChart } from '../reactive-chart/reactive-chart';
 import { Loan } from '../loan';
 
 @Component({
   selector: 'per-payment-graph',
-  imports: [CalculatedField],
+  imports: [CalculatedField, ReactiveChart],
   templateUrl: './per-payment-graph.html',
 })
+
 export class PerPaymentGraph {
   accountantService = inject(AccountantService);
   util = Utility;
 
-  loan = input<Loan>();
-
-  yearlyStats = computed(() => {
-    const loan = this.loan();
-    return loan ? this.getYearlyStats(loan) : [];
+  loan = input.required<Loan>();
+  private perPaymentStats = computed(() => {
+    return this.loan().getPerPaymentStats();
   });
-
-  monthRemainder = computed(() => {
-    const loanData = this.loan();
-    if (!loanData) return 0;
-    return loanData.getPerPaymentStats().length % 12 || 0;
+  private yearlyStats = computed(() => {
+    return this.getYearlyStats(this.perPaymentStats());
   });
 
   totalInterest = computed(() => {
-    const loanData = this.loan();
-    if (!loanData) return 0;
-    return loanData.getPerPaymentStats().reduce((sum, stat) => sum + stat.interest, 0);
+    return this.perPaymentStats()
+      .reduce((sum, stat) => sum + stat.interest, 0);
   });
 
   totalPayment = computed(() => {
-    const loanData = this.loan();
-    if (!loanData) return 0;
-    return loanData.getPerPaymentStats().reduce((sum, stat) => sum + stat.payment, 0);
+    return this.perPaymentStats()
+      .reduce((sum, stat) => sum + stat.payment, 0);
   });
 
-  
+  burnDownchartData = computed(() => {
+    const stats = this.yearlyStats();
+    const labels = stats.map((_, index) => `Year ${index + 1}`);
+    const monthRemainder = this.perPaymentStats().length % 12;
+    if (monthRemainder !== 0) {
+      labels[labels.length - 1] += ` (${monthRemainder} months)`;
+    }
+
+    return {
+      labels,
+      datasets: this.burndownDatasets(stats)
+    };
+  });
+
+  accumulatedChartData = computed(() => {
+    const stats = this.yearlyStats();
+    const labels = stats.map((_, index) => `Year ${index + 1}`);
+    const monthRemainder = this.perPaymentStats().length % 12;
+    if (monthRemainder !== 0) {
+      labels[labels.length - 1] += ` (${monthRemainder} months)`;
+    }
+
+    return {
+      labels,
+      datasets: this.accumulatedStats(stats.map(s => ({ interest: s.interest, payment: s.payment })))
+    };
+  });
 
   //aggregate monthly stats to yearly stats
-  getYearlyStats(loan: Loan): { payment: number, interest: number, remaining: number }[] {
-    const stats : { payment: number, interest: number, remaining: number }[] = [];
-    const monthlyStats = loan.getPerPaymentStats();
-    if (!monthlyStats) return [];
+  getYearlyStats(monthlyStats: { payment: number, interest: number, remaining: number }[]): { payment: number, interest: number, remaining: number }[] {
+    const stats: { payment: number, interest: number, remaining: number }[] = [];
 
     for (let i = 0; i < monthlyStats.length; i += 12) {
       const oneYearStats = monthlyStats.slice(i, i + 12);
@@ -56,5 +75,49 @@ export class PerPaymentGraph {
 
     return stats;
   }
-  
+
+  burndownDatasets(stats: { payment: number, interest: number, remaining: number }[]) {
+    return [
+      {
+        label: 'Payment',
+        data: stats.map(s => s.payment),
+        borderColor: 'blue',
+        backgroundColor: 'lightblue',
+      },
+      {
+        label: 'Interest',
+        data: stats.map(s => s.interest),
+        borderColor: 'red',
+        backgroundColor: 'pink',
+      },
+      {
+        label: 'Remaining',
+        data: stats.map(s => s.remaining),
+        borderColor: 'green',
+        backgroundColor: 'lightgreen',
+      }
+    ];
+  }
+
+  accumulatedStats(stats: { payment: number, interest: number }[]) {
+    let accumulatedInterest = 0;
+    return [
+      {
+        label: 'Accumulated Interest',
+        data: stats.map(s => {
+          accumulatedInterest += s.interest;
+          return accumulatedInterest;
+        }),
+        borderColor: 'orange',
+        backgroundColor: 'lightorange',
+      },
+      {
+        label: 'Accumulated Payment',
+        data: stats.map(s => s.payment),
+        borderColor: 'purple',
+        backgroundColor: 'lavender',
+      }
+    ];
+
+  }
 }

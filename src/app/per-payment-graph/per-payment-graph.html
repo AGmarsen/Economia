@@ -1,16 +1,13 @@
-
-<div>
-@for(stat of yearlyStats(); track stat; let last = $last; let i = $index) {
-      <div class="flex">
-        <p class="mr-1">Year {{i + 1}}</p>
-        @if (last && monthRemainder() > 0) {
-          <p class="mr-1">({{monthRemainder()}} months)</p>
-        }
-        <p class="mr-1">Payment {{util.roundTwoDecimals(stat.payment).toLocaleString()}}</p>
-        <p class="mr-1">Interest: {{(stat.interest).toLocaleString()}}</p>
-        <p class="mr-1">Remaining: {{(util.roundTwoDecimals(stat.remaining)).toLocaleString()}}</p>
-      </div>
-    }
+<div class="flex flex-wrap">
+  <div class="w-full lg:w-1/2 p-4">
+    <h3>Payment Burndown</h3>
+    <reactive-chart [type]="'line'" [chartData]="burnDownchartData()" />
+  </div>
+  <div class="w-full lg:w-1/2 p-4">
+    <h3>Accumulated Interest vs Payment</h3>
+    <reactive-chart [type]="'bar'" [chartData]="accumulatedChartData()" />
+  </div>
 </div>
+
+<calculated-field label="Total loan payment" [value]="util.roundTwoDecimals(totalPayment())" />
 <calculated-field label="Total interest" [value]="util.roundTwoDecimals(totalInterest())" />
-<calculated-field label="Total payment" [value]="util.roundTwoDecimals(totalPayment())" />
