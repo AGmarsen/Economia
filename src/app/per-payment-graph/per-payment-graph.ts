@@ -101,6 +101,7 @@ export class PerPaymentGraph {
 
   accumulatedStats(stats: { payment: number, interest: number }[]) {
     let accumulatedInterest = 0;
+    let accumulatedPayment = 0;
     return [
       {
         label: 'Accumulated Interest',
@@ -113,7 +114,10 @@ export class PerPaymentGraph {
       },
       {
         label: 'Accumulated Payment',
-        data: stats.map(s => s.payment),
+        data: stats.map(s => {
+          accumulatedPayment += s.payment;
+          return accumulatedPayment;
+        }),
         borderColor: 'purple',
         backgroundColor: 'lavender',
       }
