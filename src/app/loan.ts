@@ -1,4 +1,5 @@
 import { signal } from "@angular/core";
+import { Utility } from "./utility";
 
 export class Loan {
 
@@ -53,7 +54,7 @@ export class Loan {
       }
       // n = -log(1 - r * A / m) / log(1 + r)
       const loanTermMonths = -Math.log(1 - this.monthlyInterestRate() * this.amount / this.monthlyPayment()) / Math.log(1 + this.monthlyInterestRate());
-      this._loanTermYears.set(loanTermMonths / 12);
+      this._loanTermYears.set(Utility.roundTwoDecimals(loanTermMonths / 12));
     }
 
     setMonthlyPayment(monthlyPayment: number) {
@@ -86,7 +87,7 @@ export class Loan {
             return [];
         }
         if (numberOfPayments === Infinity) {
-            numberOfPayments = 1200;
+            numberOfPayments = 1200; // arbitrarily chosen 100 years to prevent infinite loop
         }
         let remainingAmount = this.amount;
         const monthlyInterestRate = this.monthlyInterestRate();
