@@ -4,7 +4,7 @@ import { Chart, ChartConfiguration } from 'chart.js/auto';
 @Component({
   selector: 'reactive-chart',
   imports: [],
-  template: '<canvas #chartCanvas></canvas>',
+  template: '<canvas #chartCanvas height="400"></canvas>',
 })
 export class ReactiveChart implements AfterViewInit, OnDestroy {
 
